@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bethsaida Cinema - Portal Absensi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #f8fafc; 
+            color: #1e293b;
+        }
+        .bethsaida-gradient {
+            background: linear-gradient(135deg, #f0f4ff 0%, #ffffff 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+        }
+        .btn-primary {
+            background-color: #00569c; /* Biru Bethsaida */
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #003d6f;
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background-color: #e11d48; /* Merah Bethsaida */
+        }
+        .input-focus:focus {
+            border-color: #00569c;
+            box-shadow: 0 0 0 4px rgba(0, 86, 156, 0.1);
+        }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bethsaida-gradient min-h-screen">
+
+    <div id="app" class="max-w-6xl mx-auto px-4 py-6 min-h-screen flex flex-col">
+        
+        <!-- Header / Navigasi -->
+        <nav class="flex justify-between items-center mb-10 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <div class="flex items-center gap-4">
+                <img src="https://www.bethsaidahospitals.com/assets/template_front/img/Logo%20Bethsaida%20Hospitals%20With%20Heart%20Feb18-01.png" 
+                     alt="Logo Bethsaida" class="h-12 md:h-16 object-contain">
+                <div class="h-10 w-[2px] bg-slate-200 hidden md:block"></div>
+                <div class="hidden md:block">
+                    <h1 class="text-lg font-bold text-[#00569c] leading-tight uppercase tracking-tight">Staff Portal</h1>
+                    <p class="text-xs text-slate-500 font-medium">Cinema Attendance System</p>
+                </div>
+            </div>
+            <button onclick="toggleView('login')" id="btn-admin-gate" class="text-slate-600 hover:text-[#00569c] transition-all flex items-center gap-2 text-sm font-semibold bg-slate-50 px-5 py-2.5 rounded-xl border border-slate-200">
+                <i data-lucide="lock" class="w-4 h-4"></i> Admin
+            </button>
+        </nav>
+
+        <!-- View: Check-in Publik -->
+        <main id="view-checkin" class="flex-1 flex flex-col items-center justify-center animate-fade-in">
+            <div class="text-center mb-10">
+                <span class="inline-block px-4 py-1.5 mb-4 text-xs font-bold tracking-widest text-[#e11d48] uppercase bg-red-50 rounded-full">Automated Attendance</span>
+                <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">Selamat Datang</h2>
+                <p class="text-slate-500 text-lg">Silakan scan atau masukkan NIK Anda untuk absensi hari ini.</p>
+            </div>
+
+            <div class="w-full max-w-md glass-card p-10 rounded-[2.5rem] relative overflow-hidden">
+                <!-- Aksen Warna Atas -->
+                <div class="absolute top-0 left-0 w-full h-2 flex">
+                    <div class="w-1/2 bg-[#00569c]"></div>
+                    <div class="w-1/2 bg-[#e11d48]"></div>
+                </div>
+                
+                <div class="space-y-8">
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1 text-center">Nomor Induk Karyawan</label>
+                        <input type="text" id="input-nik" placeholder="--- Masukkan NIK ---" autofocus
+                               class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-5 text-2xl focus:outline-none input-focus transition-all text-center tracking-[0.2em] font-bold text-slate-700"
+                               onkeypress="handleEnter(event)">
+                    </div>
+                    
+                    <button onclick="submitCheckIn()" id="btn-checkin" class="w-full btn-primary text-white font-bold py-5 rounded-2xl shadow-lg shadow-blue-900/20 transition-all flex justify-center items-center gap-3 group text-lg">
+                        KONFIRMASI KEHADIRAN 
+                        <i data-lucide="check-circle" class="w-6 h-6 group-hover:scale-110 transition-transform"></i>
+                    </button>
+                    
+                    <div class="pt-4 text-center">
+                        <p class="text-[10px] text-slate-400 uppercase font-medium tracking-tighter italic">Sistem terintegrasi lokal - Siap untuk GitHub Pages</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- View: Login Admin -->
+        <section id="view-login" class="hidden flex-1 flex flex-col items-center justify-center animate-fade-in">
+            <div class="w-full max-w-sm glass-card p-8 rounded-3xl">
+                <div class="text-center mb-6">
+                    <i data-lucide="shield-check" class="w-12 h-12 text-[#00569c] mx-auto mb-2"></i>
+                    <h3 class="text-xl font-bold text-slate-800">Login Administrator</h3>
+                    <p class="text-xs text-slate-400 italic">Default: admin / admin123</p>
+                </div>
+                <div class="space-y-4">
+                    <input type="text" id="admin-user" placeholder="Username" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none input-focus">
+                    <input type="password" id="admin-pass" placeholder="Password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:outline-none input-focus">
+                    <button onclick="submitLogin()" class="w-full btn-primary text-white font-bold py-3.5 rounded-xl transition-all">Masuk Ke Dashboard</button>
+                    <button onclick="toggleView('checkin')" class="w-full text-slate-400 text-sm py-2 hover:text-slate-600">Kembali ke Beranda</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Dashboard Admin -->
+        <section id="view-admin" class="hidden animate-fade-in space-y-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Manajemen Kehadiran Staff</h2>
+                    <p class="text-slate-500">Data disimpan secara lokal di browser ini.</p>
+                </div>
+                <button onclick="logout()" class="bg-white text-slate-700 px-5 py-2.5 rounded-xl text-sm font-bold border border-slate-200 hover:bg-red-50 hover:text-red-600 transition-colors flex items-center gap-2">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Log Out
+                </button>
+            </div>
+
+            <!-- Form Tambah Karyawan -->
+            <div class="glass-card p-8 rounded-3xl grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                <div class="space-y-2">
+                    <label class="text-xs text-slate-500 uppercase font-bold tracking-wider">Nomor NIK</label>
+                    <input type="text" id="new-nik" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-none input-focus">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs text-slate-500 uppercase font-bold tracking-wider">Nama Lengkap</label>
+                    <input type="text" id="new-nama" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-none input-focus">
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs text-slate-500 uppercase font-bold tracking-wider">Tanggal Jadwal</label>
+                    <input type="date" id="new-jadwal" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-none input-focus">
+                </div>
+                <button onclick="submitAddEmployee()" id="btn-add" class="btn-primary hover:opacity-90 text-white font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="user-plus" class="w-5 h-5"></i> Simpan Data
+                </button>
+            </div>
+
+            <!-- Tabel Data -->
+            <div class="glass-card rounded-3xl overflow-hidden shadow-sm">
+                <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4 bg-white">
+                    <div class="flex items-center gap-3">
+                         <div class="p-2 bg-blue-50 rounded-lg">
+                            <i data-lucide="database" class="w-5 h-5 text-[#00569c]"></i>
+                         </div>
+                         <span class="font-bold text-slate-800">Database Lokal</span>
+                         <button onclick="fetchData()" class="p-2 hover:bg-slate-100 rounded-full transition-colors" title="Muat Ulang">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 text-slate-400"></i>
+                         </button>
+                    </div>
+                    <div class="relative w-full md:w-72">
+                        <i data-lucide="search" class="absolute left-3 top-3 w-4 h-4 text-slate-400"></i>
+                        <input type="text" id="search-data" onkeyup="filterTable()" placeholder="Cari NIK atau Nama..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none input-focus">
+                    </div>
+                </div>
+                <div class="overflow-x-auto min-h-[450px]">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="text-xs text-slate-400 uppercase bg-slate-50/50">
+                            <tr>
+                                <th class="p-5 font-bold">NIK</th>
+                                <th class="p-5 font-bold">Nama Karyawan</th>
+                                <th class="p-5 font-bold">Jadwal Tugas</th>
+                                <th class="p-5 font-bold text-center">Status Absensi</th>
+                                <th class="p-5 font-bold">Jam Masuk</th>
+                                <th class="p-5 font-bold text-right">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="text-sm">
+                            <!-- Data akan dimuat di sini -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <footer class="mt-auto py-8 text-center border-t border-slate-100">
+            <p class="text-slate-400 text-xs">© 2024 Bethsaida Hospitals - Health Management System. Developed for GitHub Showcase.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // --- LOGIKA BACKEND SIMULASI (GITHUB VERSION) ---
+        // Menggunakan localStorage agar data tetap tersimpan di browser
+        
+        const DB_KEY = 'bethsaida_staff_db';
+        
+        // Inisialisasi data jika kosong
+        if (!localStorage.getItem(DB_KEY)) {
+            const initialData = [
+                ["12345", "Budi Santoso", "2024-12-25", "Available", "-"],
+                ["67890", "Siti Aminah", "2024-12-25", "Available", "-"]
+            ];
+            localStorage.setItem(DB_KEY, JSON.stringify(initialData));
+        }
+
+        function getDB() {
+            return JSON.parse(localStorage.getItem(DB_KEY));
+        }
+
+        function saveDB(data) {
+            localStorage.setItem(DB_KEY, JSON.stringify(data));
+        }
+
+        // --- UI LOGIC ---
+        lucide.createIcons();
+
+        window.onload = () => {
+            document.getElementById('input-nik').focus();
+        };
+
+        function toggleView(view) {
+            document.getElementById('view-checkin').classList.add('hidden');
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('view-admin').classList.add('hidden');
+            
+            document.getElementById('view-' + view).classList.remove('hidden');
+            
+            if(view === 'checkin') {
+                const nikInput = document.getElementById('input-nik');
+                setTimeout(() => nikInput.focus(), 100);
+            }
+            if(view === 'admin') fetchData(); 
+        }
+
+        function handleEnter(e) {
+            if(e.key === 'Enter') submitCheckIn();
+        }
+
+        function submitCheckIn() {
+            const nikInput = document.getElementById('input-nik');
+            const nik = nikInput.value.trim();
+            if(!nik) return;
+
+            const btn = document.getElementById('btn-checkin');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<span class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></span>';
+            btn.disabled = true;
+
+            // Simulasi proses delay server
+            setTimeout(() => {
+                const db = getDB();
+                const today = new Date().toISOString().split('T')[0];
+                const now = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                
+                const index = db.findIndex(row => row[0] === nik);
+
+                if (index === -1) {
+                    showError("NIK tidak terdaftar dalam jadwal hari ini.");
+                } else if (db[index][3] === 'Checked-in') {
+                    showError("Anda sudah melakukan absensi hari ini.");
+                } else {
+                    // Update Status
+                    db[index][3] = 'Checked-in';
+                    db[index][4] = now;
+                    saveDB(db);
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Check-in Berhasil',
+                        html: `<div class="text-slate-600 py-2">Halo <b>${db[index][1]}</b>,<br>Selamat bertugas dan jaga kesehatan!<br><br><span class="text-xs text-slate-400 italic">Waktu: ${now}</span></div>`,
+                        background: '#ffffff',
+                        color: '#1e293b',
+                        confirmButtonColor: '#00569c',
+                        timer: 2500,
+                        timerProgressBar: true,
+                        showConfirmButton: false
+                    }).then(() => {
+                        nikInput.focus();
+                    });
+                }
+                
+                nikInput.value = '';
+                resetButton(btn, originalContent);
+            }, 800);
+        }
+
+        function showError(msg) {
+            Swal.fire({ 
+                icon: 'error', 
+                title: 'Check-in Gagal', 
+                text: msg, 
+                background: '#ffffff', 
+                color: '#1e293b', 
+                confirmButtonColor: '#e11d48',
+                timer: 2500,
+                timerProgressBar: true
+            });
+        }
+
+        function submitLogin() {
+            const user = document.getElementById('admin-user').value;
+            const pass = document.getElementById('admin-pass').value;
+
+            // Simple admin check
+            if (user === 'admin' && pass === 'admin123') {
+                toggleView('admin');
+            } else {
+                Swal.fire({ icon: 'error', title: 'Akses Ditolak', text: 'Username atau Password salah!', background: '#ffffff', color: '#1e293b' });
+            }
+        }
+
+        function fetchData() {
+            const db = getDB();
+            renderTable(db);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('table-body');
+            if(!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-10 text-center text-slate-400">Belum ada jadwal staff terdaftar.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(row => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-all">
+                    <td class="p-5 font-bold text-[#00569c]">${row[0]}</td>
+                    <td class="p-5 font-semibold text-slate-700">${row[1]}</td>
+                    <td class="p-5 text-slate-500 font-medium">${row[2]}</td>
+                    <td class="p-5 text-center">
+                        <span class="px-4 py-1.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest ${row[3] === 'Available' ? 'bg-slate-100 text-slate-400' : 'bg-green-100 text-green-600'}">
+                            ${row[3]}
+                        </span>
+                    </td>
+                    <td class="p-5 text-slate-600 font-mono font-bold">${row[4]}</td>
+                    <td class="p-5 text-right">
+                        <button onclick="confirmDelete('${row[0]}')" class="text-slate-300 hover:text-red-500 transition-all p-2 bg-white hover:bg-red-50 border border-slate-100 rounded-lg">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function submitAddEmployee() {
+            const nik = document.getElementById('new-nik').value;
+            const nama = document.getElementById('new-nama').value;
+            const jadwal = document.getElementById('new-jadwal').value;
+
+            if(!nik || !nama || !jadwal) {
+                Swal.fire({ icon: 'warning', title: 'Data Tidak Lengkap', text: 'Mohon isi semua informasi karyawan.', background: '#ffffff', color: '#1e293b' });
+                return;
+            }
+
+            const db = getDB();
+            db.push([nik, nama, jadwal, "Available", "-"]);
+            saveDB(db);
+            
+            Swal.fire({ icon: 'success', title: 'Berhasil Disimpan', text: 'Data staff baru telah ditambahkan.', timer: 2000, showConfirmButton: false, background: '#ffffff', color: '#1e293b', timerProgressBar: true });
+            
+            renderTable(db); 
+            ['new-nik', 'new-nama', 'new-jadwal'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        function confirmDelete(nik) {
+            Swal.fire({
+                title: 'Hapus Data Staff?',
+                text: "NIK " + nik + " akan dihapus permanen.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Ya, Hapus',
+                background: '#ffffff',
+                color: '#1e293b'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let db = getDB();
+                    db = db.filter(row => row[0] !== nik);
+                    saveDB(db);
+                    renderTable(db);
+                }
+            })
+        }
+
+        function logout() { toggleView('checkin'); }
+        function resetButton(btn, content) { btn.innerHTML = content; btn.disabled = false; }
+        
+        function filterTable() {
+            const input = document.getElementById("search-data").value.toUpperCase();
+            const rows = document.getElementById("table-body").getElementsByTagName("tr");
+            for (let i = 0; i < rows.length; i++) {
+                const text = rows[i].innerText.toUpperCase();
+                rows[i].style.display = text.indexOf(input) > -1 ? "" : "none";
+            }
+        }
+    </script>
+</body>
+</html>
